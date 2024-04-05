@@ -19,10 +19,11 @@ public class Tests
             Url = "https://artnow.ru/"
         };
         _artNowDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+        _artNowDriver.Manage().Window.Maximize();
     }
 
     [Test]
-    public void OpenEmbroideredPaintings_SelectCityscapeGenre_ShouldContainExpectedPictureName()
+    public void CatalogContainExpectedPictureNameTest()
     {
         // ARRANGE
         const string expectedPictureName = "Трамвайный путь";
@@ -31,17 +32,17 @@ public class Tests
         _artNowDriver.MainMenu().ClickOnCategory(MainMenuElement.Category.EmbroideredPaintings);
         
         // Применение фильтра «Городской пейзаж»
-        _artNowDriver.ChapterPage().Genre().Select(GenreElement.Genre.Cityscape);
+        _artNowDriver.CatalogPage().Genre().Select(GenreElement.Genre.Cityscape);
         
         // Получение всех картин на странице
-        var actualPictureNames = _artNowDriver.ChapterPage().Posts();
+        var actualPictureNames = _artNowDriver.CatalogPage().ProductNames();
 
         // ASSERT
-        actualPictureNames.Should().Contain(x => x.Header().Contains(expectedPictureName));
+        actualPictureNames.Should().Contain(x => x.Contains(expectedPictureName));
     }
     
     [Test]
-    public void OpenEmbroideredPaintings_SelectCityscapeGenre_OpenPicturePage_StyleShouldBeExpected()
+    public void PictureShouldContainExpectedStyleTest()
     {
         // ARRANGE
         const string expectedStyleName = "Реализм";
@@ -51,11 +52,10 @@ public class Tests
         _artNowDriver.MainMenu().ClickOnCategory(MainMenuElement.Category.EmbroideredPaintings);
         
         // Применение фильтра «Городской пейзаж»
-        _artNowDriver.ChapterPage().Genre().Select(GenreElement.Genre.Cityscape);
+        _artNowDriver.CatalogPage().Genre().Select(GenreElement.Genre.Cityscape);
         
         // Клик на товар
-        var posts = _artNowDriver.ChapterPage().Posts();
-        posts.First(x => x.Header().Contains(pictureName)).Click();
+        _artNowDriver.CatalogPage().ClickToProduct(pictureName);
 
         // Получение названия стиля
         var actualStyleName = _artNowDriver.PicturePage().Style();
@@ -65,17 +65,72 @@ public class Tests
     }
     
     [Test]
-    public void OpenBatik()
+    public void AddPictureToFacotiteTest()
     {
-        // ARRANGE
-        const string expectedStyleName = "Реализм";
-        const string pictureName = "Трамвайный путь";
-        
         // Переход в батик
         _artNowDriver.MainMenu().ClickOnCategory(MainMenuElement.Category.Batik);
-        Console.WriteLine();
+        
+        // Сохранение название первого товара в каталоге
+        var expectedProductName = _artNowDriver.CatalogPage().ProductNames().First().RemoveNewLine();
+        
+        // Добавление первого товара в избранное
+        _artNowDriver.CatalogPage().AddToFavorite(1);
+        
+        // Переход в избранное
+        _artNowDriver.Header().ClickOnFavorite();
+        
+        // Сохранение название первого товара из каталога избранного
+        var actualProductName = _artNowDriver.CatalogPage().ProductNames().First().RemoveNewLine();;
+
         // ASSERT
-        // actualStyleName.Should().Be(expectedStyleName);
+        actualProductName.Should().Be(expectedProductName);
+    }
+    
+    [Test]
+    public void SearchTest()
+    {
+        // ARRNGE
+        const string searchTerm = "Жираф";
+        
+        // Поиск по слову
+        _artNowDriver.Header().Search(searchTerm);
+        
+        // Сохранение название первого товара в каталоге
+        var actualFirstProductName = _artNowDriver.CatalogPage().ProductNames().First();
+        
+        // ASSERT
+        actualFirstProductName.Should().Contain(searchTerm);
+    }
+    
+    [Test]
+    public void AddToBasketTest()
+    {
+        // ACT
+        
+        // Переход в Ювелирное искусство
+        _artNowDriver.MainMenu().ClickOnCategory(MainMenuElement.Category.JewelryArt);
+        
+        // Сохранение название первого товара в каталоге
+        var expectedProductName = _artNowDriver.CatalogPage().ProductNames().First().RemoveNewLine();
+        
+        // Сохранение цены первого товара в каталоге
+        var expectedProductPrice = _artNowDriver.CatalogPage().ProductPrices().First();
+        
+        // Добавление в корзину первого товара
+        _artNowDriver.CatalogPage().AddToBasket(1); 
+        
+        // Переход в корзину
+        _artNowDriver.Header().ClickOnBasket();
+
+        // Сохранение названия товара из корзины
+        var actualProductName = _artNowDriver.BasketPage().ProductNames().First();
+        
+        // Сохранение цены товара из корзины
+        var actualProductPrice = _artNowDriver.BasketPage().ProductPrices().First();
+        
+        // ASSERT
+        expectedProductName.Should().Contain(actualProductName);
+        actualProductPrice.Should().Be(expectedProductPrice);
     }
     
     [TearDown]

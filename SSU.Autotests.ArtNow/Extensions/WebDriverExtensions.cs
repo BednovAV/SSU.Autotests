@@ -11,9 +11,19 @@ public static class WebDriverExtensions
         return new MainMenuElement(webDriver.FindElement(By.XPath("//div[@class='main_menu']")));
     }
     
-    public static ChapterPageObject ChapterPage(this IWebDriver webDriver)
+    public static HeaderElement Header(this IWebDriver webDriver)
     {
-        return new ChapterPageObject(webDriver);
+        return new HeaderElement(webDriver.FindElement(By.XPath("//div[@class='topheader']")));
+    }
+    
+    public static CatalogPageObject CatalogPage(this IWebDriver webDriver)
+    {
+        return new CatalogPageObject(webDriver);
+    }
+    
+    public static BasketPageObject BasketPage(this IWebDriver webDriver)
+    {
+        return new BasketPageObject(webDriver);
     }
     
     public static PicturePageObject PicturePage(this IWebDriver webDriver)

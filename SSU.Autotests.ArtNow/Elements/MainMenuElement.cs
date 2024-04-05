@@ -24,8 +24,8 @@ public class MainMenuElement
     
     public enum Category
     {
-        [Description("Живопись")] Painting,
         [Description("Вышитые картины")] EmbroideredPaintings,
         [Description("Батик")] Batik,
+        [Description("Ювелирное искусство")] JewelryArt,
     }
 }
